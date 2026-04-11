@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caleb M.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-dark:     #050707;
+      --bg-mid:      #0b1010;
+      --teal:        #00c9b1;
+      --teal-dim:    rgba(0, 201, 177, 0.08);
+      --teal-border: rgba(0, 201, 177, 0.18);
+      --teal-hover:  rgba(0, 201, 177, 0.45);
+      --text:        #c5d6d3;
+      --text-muted:  #3d5555;
+      --card-bg:     rgba(8, 14, 14, 0.72);
+      --mono:        'IBM Plex Mono', monospace;
+      --display:     'Syne', sans-serif;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      background: radial-gradient(ellipse at 50% 35%, var(--bg-mid) 0%, var(--bg-dark) 68%);
+      color: var(--text);
+      font-family: var(--mono);
+      font-weight: 400;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ── Symbol background layer ── */
+    #symbols {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    /* Horizontally drifting symbols */
+    .sym-drift {
+      position: absolute;
+      font-family: var(--mono);
+      color: #121b1b;
+      user-select: none;
+      will-change: transform, opacity;
+      animation: symDrift linear infinite;
+    }
+
+    @keyframes symDrift {
+      0%   { transform: translateX(0);        opacity: 0; }
+      8%   {                                   opacity: 1; }
+      92%  {                                   opacity: 1; }
+      100% { transform: translateX(var(--dx)); opacity: 0; }
+    }
+
+    /* Orbiting symbols */
+    .sym-orbit-wrap {
+      position: absolute;
+      width: 0;
+      height: 0;
+      animation: symOrbit linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes symOrbit {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    .sym-orbit-inner {
+      position: absolute;
+      font-family: var(--mono);
+      color: #121b1b;
+      user-select: none;
+      animation: symOrbitCounter linear infinite;
+      will-change: transform;
+      white-space: nowrap;
+    }
+
+    @keyframes symOrbitCounter {
+      from { transform: translateX(var(--radius)) rotate(0deg); }
+      to   { transform: translateX(var(--radius)) rotate(-360deg); }
+    }
+
+    /* ── Page wrapper ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      width: 100%;
+      max-width: 620px;
+      padding: 3.5rem 2rem 2rem;
+      opacity: 0;
+      animation: fadeUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
+    }
+
+    .header-eyebrow {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--teal);
+      opacity: 0.65;
+      margin-bottom: 0.55rem;
+    }
+
+    header h1 {
+      font-family: var(--display);
+      font-size: clamp(2.8rem, 7vw, 4rem);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1;
+      color: #dff0ec;
+    }
+
+    header h1 .accent { color: var(--teal); }
+
+    .header-tagline {
+      margin-top: 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 300;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+
+    .header-rule {
+      margin-top: 1.6rem;
+      height: 1px;
+      background: linear-gradient(to right, var(--teal-border) 0%, transparent 80%);
+    }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 620px;
+      padding: 2rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .section-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+
+    /* ── Link cards ── */
+    .link-card {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      background: var(--card-bg);
+      border: 1px solid var(--teal-border);
+      border-radius: 10px;
+      padding: 0.85rem 1.05rem;
+      text-decoration: none;
+      color: var(--text);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: border-color 0.2s, background 0.2s, transform 0.18s, box-shadow 0.2s;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .link-card:hover {
+      border-color: var(--teal-hover);
+      background: rgba(0, 201, 177, 0.05);
+      transform: translateY(-2px);
+      box-shadow: 0 0 28px rgba(0, 201, 177, 0.07), 0 6px 20px rgba(0,0,0,0.5);
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      border: 1px solid var(--teal-border);
+      background: var(--teal-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .link-card:hover .card-icon {
+      border-color: var(--teal-hover);
+      background: rgba(0, 201, 177, 0.12);
+    }
+
+    .card-icon svg {
+      width: 17px;
+      height: 17px;
+      fill: var(--teal);
+    }
+
+    .card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.08rem;
+    }
+
+    .card-category {
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #d5e8e5;
+    }
+
+    .card-arrow {
+      color: #1e2e2e;
+      flex-shrink: 0;
+      transition: color 0.2s, transform 0.18s;
+    }
+
+    .link-card:hover .card-arrow { color: var(--teal); transform: translateX(4px); }
+
+    /* ── Footer ── */
+    footer {
+      width: 100%;
+      max-width: 620px;
+      padding: 1.5rem 2rem 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.5s forwards;
+    }
+
+    .footer-rule {
+      height: 1px;
+      background: linear-gradient(to right, var(--teal-border) 0%, transparent 80%);
+      margin-bottom: 1.1rem;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .footer-copy {
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .footer-copy .accent { color: var(--teal); opacity: 0.7; }
+
+    .footer-status {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+      animation: blink 2.6s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0.3; transform: scale(1);    }
+      50%       { opacity: 1;   transform: scale(1.3); }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="symbols" aria-hidden="true"></div>
+
+  <div class="page">
+    <header>
+      <p class="header-eyebrow">// portfolio</p>
+      <h1 id="header-name"></h1>
+      <p class="header-tagline" id="header-tagline"></p>
+      <div class="header-rule"></div>
+    </header>
+
+    <main id="link-list">
+      <p class="section-label">// links</p>
+    </main>
+
+    <footer>
+      <div class="footer-rule"></div>
+      <div class="footer-inner">
+        <p class="footer-copy">&copy; 2026 <span class="accent" id="footer-name"></span> &mdash; all rights reserved</p>
+        <div class="footer-status">
+          <div class="status-dot"></div>
+          <span id="footer-status-text"></span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    /* ================================================================
+       ✦  CONFIG  —  Edit this block to update your site
+    ================================================================ */
+    const CONFIG = {
+      name:       "Caleb M.",
+      tagline:    "developer  ·  creator  ·  builder",
+      statusText: "available for opportunities",
+
+      links: [
+        {
+          category: "Video",
+          title:    "YouTube",
+          url:      "https://youtube.com/@yourhandle",      // ← your URL
+          icon:     "youtube"
+        },
+        {
+          category: "Short-form",
+          title:    "TikTok",
+          url:      "https://tiktok.com/@yourhandle",       // ← your URL
+          icon:     "tiktok"
+        },
+        {
+          category: "Code",
+          title:    "GitHub",
+          url:      "https://github.com/yourhandle",        // ← your URL
+          icon:     "github"
+        },
+        {
+          category: "Projects",
+          title:    "Game Development Index",
+          url:      "https://yourwebsite.com/games",        // ← your URL
+          icon:     "gamepad"
+        },
+        {
+          category: "Resume",
+          title:    "View My CV",
+          url:      "https://yourwebsite.com/resume.pdf",   // ← your URL
+          icon:     "resume"
+        },
+        {
+          category: "Contact",
+          title:    "Get In Touch",
+          url:      "mailto:you@email.com",                 // ← your email
+          icon:     "email"
+        }
+      ]
+    };
+
+    /* ================================================================
+       ✦  ICONS
+    ================================================================ */
+    const ICONS = {
+      youtube:  `<path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>`,
+      tiktok:   `<path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/>`,
+      github:   `<path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>`,
+      gamepad:  `<path d="M17.5 6H6.5A6.5 6.5 0 0 0 0 12.5C0 16.09 2.91 19 6.5 19c1.86 0 3.53-.79 4.71-2.04L12 16l.79.96A6.473 6.473 0 0 0 17.5 19c3.59 0 6.5-2.91 6.5-6.5S21.09 6 17.5 6zM10 13H8v2H6v-2H4v-2h2V9h2v2h2v2zm4.5 1a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm2-3a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>`,
+      resume:   `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6zm2-5h8v1.5H8V15zm0-3h8v1.5H8V12zm0-3h4v1.5H8V9z"/>`,
+      email:    `<path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/>`,
+      globe:    `<path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm6.93 6h-2.95a15.65 15.65 0 0 0-1.38-3.56A8.014 8.014 0 0 1 18.93 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14a7.822 7.822 0 0 1 0-4h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.81 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.987 7.987 0 0 1 5.07 16zm2.95-8H5.07a7.987 7.987 0 0 1 4.33-3.56A15.65 15.65 0 0 0 8.02 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.014 8.014 0 0 1-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38a7.822 7.822 0 0 1 0 4h-3.38z"/>`,
+      linkedin: `<path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>`
+    };
+
+    /* ================================================================
+       ✦  UNICODE SYMBOL POOL
+       Add or remove characters from any category freely.
+    ================================================================ */
+    const SYMBOL_POOL = [
+      /* Math & logic */
+      '∑','∂','∇','∞','∫','∏','√','∆','∀','∃','∈','∉','⊂','⊃','∩','∪',
+      '≠','≈','≡','≤','≥','±','×','÷','∝','∅','∴','∵','⊕','⊗','⊥','∥',
+      /* Geometric */
+      '◆','◇','○','●','□','■','△','▲','▽','▼','◈','◉','◎','⬡','⬢','⬟',
+      '⬠','▷','◁','◀','▶','◐','◑','◒','◓','⬖','⬗','⬘','⬙','⟁','⌬',
+      /* Arrows */
+      '←','→','↑','↓','↔','↕','⇐','⇒','⇑','⇓','⇔','↗','↘','↙','↖',
+      '⇢','⇠','⇡','⇣','↭','⇝','⇜','↺','↻','⟳','⟲','↯','⤴','⤵',
+      /* Box drawing */
+      '┌','┐','└','┘','├','┤','┬','┴','┼','─','│','╔','╗','╚','╝','╠',
+      '╣','╦','╩','╬','═','║','╒','╓','╕','╖','╘','╙','╛','╜','╞','╡',
+      /* Greek */
+      'α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ','ν','ξ','π','ρ',
+      'σ','τ','υ','φ','χ','ψ','ω','Γ','Λ','Σ','Φ','Ψ','Ω',
+      /* Misc techy */
+      '⌘','⌥','⎋','⏎','⌫','⌦','⊞','⊟','⊠','⊡','⌨','⌃','⇧','⌀',
+      '⟨','⟩','⟦','⟧','⟪','⟫','⦃','⦄','⦇','⦈','❮','❯',
+      /* Stars & sparkles */
+      '★','☆','✦','✧','✩','✪','✫','✬','✭','✮','✯','✰','⋆','✶','✷','✸',
+      /* Braille dots (techy texture) */
+      '⣿','⣾','⣽','⣻','⢿','⡿','⣷','⣯','⣟','⡾','⢾','⣜','⣸','⢸',
+      /* Misc symbols */
+      '⚙','⚡','⚛','⚗','⚔','⚑','⚐','☰','☱','☲','☳','☴','☵','☶','☷',
+      '⌖','⌗','⌘','⊹','⋈','⋉','⋊','⋋','⋌','⋍','⋎','⋏','⋐','⋑'
+    ];
+
+    /* ================================================================
+       ✦  BACKGROUND — drifters + orbiters, both using random symbols
+    ================================================================ */
+    function rand(min, max) { return min + Math.random() * (max - min); }
+    function pick(arr)       { return arr[Math.floor(Math.random() * arr.length)]; }
+
+    function spawnDrifters(count = 24) {
+      const container = document.getElementById('symbols');
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('span');
+        el.className = 'sym-drift';
+        el.textContent = pick(SYMBOL_POOL);
+
+        const goRight  = i % 2 === 0;
+        const distance = rand(140, 300);
+        const dx       = goRight ? distance : -distance;
+        const size     = rand(10, 18);
+        const dur      = rand(20, 45);
+        const del      = -rand(0, dur);
+
+        el.style.cssText =
+          `left:${goRight ? rand(-5, 35) : rand(65, 108)}vw;` +
+          `top:${rand(3, 94)}vh;` +
+          `font-size:${size}px;` +
+          `--dx:${dx}px;` +
+          `animation-duration:${dur}s;` +
+          `animation-delay:${del}s;`;
+        container.appendChild(el);
+      }
+    }
+
+    function spawnOrbiters(count = 16) {
+      const container = document.getElementById('symbols');
+      for (let i = 0; i < count; i++) {
+        const wrap = document.createElement('div');
+        wrap.className = 'sym-orbit-wrap';
+
+        const dur = rand(22, 60);
+        const del = -rand(0, dur);
+        const dir = Math.random() > 0.5 ? 'normal' : 'reverse';
+
+        wrap.style.cssText =
+          `left:${rand(5, 95)}vw;` +
+          `top:${rand(8, 92)}vh;` +
+          `animation-duration:${dur}s;` +
+          `animation-delay:${del}s;` +
+          `animation-direction:${dir};`;
+
+        const inner = document.createElement('span');
+        inner.className = 'sym-orbit-inner';
+        inner.textContent = pick(SYMBOL_POOL);
+
+        const radius = rand(30, 95);
+        const size   = rand(9, 16);
+
+        inner.style.cssText =
+          `--radius:${radius}px;` +
+          `font-size:${size}px;` +
+          `animation-duration:${dur}s;` +
+          `animation-delay:${del}s;` +
+          `animation-direction:${dir};`;
+
+        wrap.appendChild(inner);
+        container.appendChild(wrap);
+      }
+    }
+
+    /* ================================================================
+       ✦  RENDER
+    ================================================================ */
+    function renderHeader() {
+      const parts = CONFIG.name.trim().split(' ');
+      const last  = parts.pop();
+      document.getElementById('header-name').innerHTML =
+        (parts.length ? parts.join(' ') + ' ' : '') +
+        `<span class="accent">${last}</span>`;
+      document.getElementById('header-tagline').textContent = CONFIG.tagline;
+      document.title = CONFIG.name;
+    }
+
+    function renderLinks() {
+      const list = document.getElementById('link-list');
+      CONFIG.links.forEach((link, i) => {
+        const a = document.createElement('a');
+        a.className = 'link-card';
+        a.href = link.url;
+        a.target = link.url.startsWith('mailto') ? '_self' : '_blank';
+        a.rel = 'noopener noreferrer';
+        a.style.animationDelay = `${0.15 + i * 0.09}s`;
+        a.innerHTML = `
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              ${ICONS[link.icon] || ICONS.globe}
+            </svg>
+          </div>
+          <div class="card-body">
+            <span class="card-category">${link.category}</span>
+            <span class="card-title">${link.title}</span>
+          </div>
+          <div class="card-arrow">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </div>`;
+        list.appendChild(a);
+      });
+    }
+
+    function renderFooter() {
+      document.getElementById('footer-name').textContent = CONFIG.name;
+      document.getElementById('footer-status-text').textContent = CONFIG.statusText;
+    }
+
+    /* ── Init ── */
+    spawnDrifters();
+    spawnOrbiters();
+    renderHeader();
+    renderLinks();
+    renderFooter();
+  </script>
+</body>
+</html>
